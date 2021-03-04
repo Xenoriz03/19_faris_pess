@@ -25,12 +25,12 @@
 	if($btnDispatchClicked == false && $btnProcessCallClicked == false) {
 		header("location: logcall.php");
 	}
-		if($btnProcessCallClicked == true) {
+		if($btnDispatchClicked == true) {
 			$insertIncidentSuccess = false;
 			$hasCarSelection = isset($_POST["cbCarSelection"]);
 			$patrolcarDispatched = [];
 			$numOfPatrolCarDispatched = 0;
-			if($hasCarSelection == true) {
+			if($hasCarSelection == true){
 				$patrolcarDispatched = $_POST["cbCarSelection"];
 				$numOfPatrolCarDispatched = count($patrolcarDispatched);
 			}
@@ -38,12 +38,14 @@
 			$incidentStatus = 0;
 			
 			if($numOfPatrolCarDispatched > 0) {
-				$$incidentStatus = 2; //dispatched
+				$incidentStatus = 2; //dispatched
+			
 			}
 			else {
 				$incidentStatus = 1; //pending
 			}
-			$callerName = $_POST["callerName"];
+			
+		$callerName = $_POST["callerName"];
 			$contactNo = $_POST["contactNo"];
 			$locationOfIncident = $_POST["locationOfIncident"];
 			$typeOfIncident = $_POST["typeOfIncident"];
@@ -62,9 +64,29 @@
 			$insertDispatchSuccess = false;
 			
 			foreach($patrolcarDispatched as $eachCarId) {
-				echo $eachCarId . "<br>";
+				//echo $eachCarId . "<br>";
+				
+				$sql = "UPDATE `patrolcar` SET `patrolcar_status_id`=1 WHERE `patrolcar_id`='" . $eachCarId . "'";
+				$updateSuccess = $conn->query($sql);
+				
+				if($updateSuccess == false) {
+					echo "Error:" . $sql . "<br>" . $conn->error;
+				}
+				$sql = "INSERT INTO `dispatch`(`incident_id`, `patrol_car_id`, `time_dispatched`) VALUES (". $incidentId . ",'" . $eachCarId . "',now())";
+				$insertDispatchSuccess = $conn->query($sql);
+				
+				if($insertDispatchSuccess == false) {
+					echo "Error:" . $sql . "<br>" . $conn->error;
+			}
+			
+			}
+			$conn->close();
+			
+			if($insertDispatchSuccess == true && $updateSuccess == true && $insertDispatchSuccess == true) {
+				header("location: logcall.php");
 			}
 		}
+	
 ?>
 <!doctype html>
 <html>
